@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mixy-GIFT</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0a0a0a, #1a1a2e);
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      color: white;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 500px;
+    }
+
+    .loading-text {
+      font-size: 32px;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; }
+      100% { opacity: 0.7; }
+    }
+
+    .loading-subtext {
+      font-size: 16px;
+      margin-bottom: 30px;
+      color: #aaa;
+    }
+
+    .progress-container {
+      width: 100%;
+      margin: 20px auto;
+      background: rgba(255, 255, 255, 0.1);
+      height: 25px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+      position: relative;
+    }
+
+    .bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00ff00, #00cc00, #009900);
+      transition: width 0.3s;
+      position: relative;
+      border-radius: 12px;
+    }
+
+    .bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .percentage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 5px black;
+    }
+
+    #start-container {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    #start-button {
+      padding: 15px 40px;
+      font-size: 22px;
+      background: linear-gradient(45deg, #ff0066, #ff6600);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255, 0, 102, 0.7);
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    #start-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255, 0, 102, 0.9);
+    }
+
+    #ghost {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: black;
+      z-index: 999;
+      animation: shake 0.15s infinite;
+    }
+
+    #ghost img {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      animation: zoom 0.4s alternate infinite;
+    }
+
+    @keyframes zoom {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px); }
+      25% { transform: translate(-1px, 2px); }
+      50% { transform: translate(-3px, 1px); }
+      75% { transform: translate(2px, -1px); }
+      100% { transform: translate(1px, 2px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="loading-text">Mixy-GIFT</div>
+    <div class="loading-subtext">Preparing your surprise...</div>
+    <div class="progress-container">
+      <div class="bar" id="bar"></div>
+      <div class="percentage" id="percentage">0%</div>
+    </div>
+  </div>
+
+  <div id="start-container">
+    <div class="loading-text">Mixy-GIFT</div>
+    <div class="loading-subtext">Your surprise is ready!</div>
+    <button id="start-button">Start</button>
+  </div>
+
+  <div id="ghost">
+    <img id="ghost-img" src="https://i.supaimg.com/6eb37934-f609-4659-9f8a-fde25505f790.gif" alt="Ghost"/>
+    <audio id="scream" src="https://www.fesliyanstudios.com/play-mp3/6413"></audio>
+  </div>
+
+  <!-- Background audio that will play after clicking Start -->
+  <audio id="background-audio" loop>
+    <source src="mk.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    let progress = 0;
+    let bar = document.getElementById("bar");
+    let percentage = document.getElementById("percentage");
+    let backgroundAudio = document.getElementById("background-audio");
+    let startButton = document.getElementById("start-button");
+    let startContainer = document.getElementById("start-container");
+
+    let interval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        document.getElementById("loading").style.display = "none";
+        // Show the start button instead of automatically showing ghost
+        startContainer.style.display = "block";
+      }
+      bar.style.width = progress + "%";
+      percentage.textContent = Math.round(progress) + "%";
+    }, 500);
+
+    // When start button is clicked
+    startButton.addEventListener("click", function() {
+      startContainer.style.display = "none";
+      showGhost();
+    });
+
+    function showGhost() {
+      let ghost = document.getElementById("ghost");
+      ghost.style.display = "block";
+
+      // Play background audio
+      backgroundAudio.play().catch(e => {
+        console.log("Audio play failed:", e);
+      });
+
+      // Play scream audio
+      document.getElementById("scream").play();
+
+      // Vibrate
+      if (navigator.vibrate) {
+        navigator.vibrate([300, 200, 300, 100, 500]);
+      }
+
+      // Hide after 6 seconds
+      setTimeout(() => {
+        ghost.style.display = "none";
+        alert("😂 Prank ho gaya! Dar gaye kya?");
+        // Optionally restart the experience
+        // location.reload();
+      }, 6000);
+    }
+  </script>
+</body>
+</html>
